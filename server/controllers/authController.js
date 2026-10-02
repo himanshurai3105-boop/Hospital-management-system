@@ -123,3 +123,23 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @route POST /api/auth/upload-photo
+// @desc  Any logged-in user uploads/updates their profile photo
+exports.uploadProfilePhoto = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image uploaded" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { profilePhoto: req.file.path },
+      { new: true }
+    ).select("-password");
+
+    res.json({ message: "Profile photo updated", profilePhoto: user.profilePhoto, user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       match: [/^[6-9]\d{9}$/, "Please enter a valid 10-digit phone number"],
     },
+    profilePhoto: { type: String, default: "" },
     aadhaarNumber: {
       type: String,
       match: [/^\d{12}$/, "Aadhaar number must be exactly 12 digits"],
