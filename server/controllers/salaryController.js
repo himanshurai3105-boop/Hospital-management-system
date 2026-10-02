@@ -21,29 +21,34 @@ exports.setBaseSalary = async (req, res) => {
 
 // @route POST /api/salary/generate
 // @desc  Admin generates salary records for all doctors for a given month/year
+// @route POST /api/salary/generate
 exports.generateMonthlySalary = async (req, res) => {
   try {
     const { month, year } = req.body;
 
-    const doctors = await User.find({ role: "doctor", isActive: true });
+    const employees = await User.find({
+      role: { $in: ["doctor", "receptionist", "staff"] },
+      isActive: true,
+    });
+
     let created = 0;
     let skipped = 0;
 
-    for (const doctor of doctors) {
-      if (!doctor.baseSalary || doctor.baseSalary <= 0) {
+    for (const emp of employees) {
+      if (!emp.baseSalary || emp.baseSalary <= 0) {
         skipped++;
         continue;
       }
-      const exists = await Salary.findOne({ doctor: doctor._id, month, year });
+      const exists = await Salary.findOne({ doctor: emp._id, month, year });
       if (exists) {
         skipped++;
         continue;
       }
-      await Salary.create({ doctor: doctor._id, month, year, amount: doctor.baseSalary });
+      await Salary.create({ doctor: emp._id, month, year, amount: emp.baseSalary });
       created++;
     }
 
-    res.json({ message: `Salary generated for ${created} doctors. ${skipped} skipped (already exists or no base salary set).` });
+    res.json({ message: `Salary generated for ${created} employees. ${skipped} skipped (already exists or no base salary set).` });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -59,9 +64,9 @@ exports.getAllSalaries = async (req, res) => {
     if (year) filter.year = Number(year);
     if (status) filter.status = status;
 
-    const salaries = await Salary.find(filter)
-      .populate("doctor", "name email specialization hospitalId")
-      .sort({ year: -1, month: -1 });
+   const salaries = await Salary.find(filter)
+  .populate("doctor", "name email specialization hospitalId role staffType")
+  .sort({ year: -1, month: -1 });
 
     res.json(salaries);
   } catch (error) {

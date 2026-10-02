@@ -114,6 +114,9 @@ const Navbar = () => {
           <Link className="btn btn-outline-light btn-sm" to="/admin/receptionists">
             Receptionists
           </Link>
+          <Link className="btn btn-outline-light btn-sm" to="/admin/staff">
+            Staff
+          </Link>
          </>
         )}
 

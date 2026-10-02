@@ -15,6 +15,12 @@ const {
   getAllReceptionists,
   toggleReceptionistStatus,
   deleteReceptionist,
+  addStaff,
+  getAllStaff,
+  editStaff,
+toggleStaffStatus,
+deleteStaff,
+
 } = require("../controllers/adminController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
@@ -34,5 +40,9 @@ router.post("/receptionists", addReceptionist);
 router.get("/receptionists", getAllReceptionists);
 router.put("/receptionists/:id/toggle-status", toggleReceptionistStatus);
 router.delete("/receptionists/:id", deleteReceptionist);
-
+router.post("/staff", addStaff);
+router.get("/staff", getAllStaff);
+router.put("/staff/:id", editStaff);
+router.put("/staff/:id/toggle-status", toggleStaffStatus);
+router.delete("/staff/:id", deleteStaff);
 module.exports = router;

@@ -21,9 +21,10 @@ const Login = () => {
       toast.success("Login successful!");
 
       // Role ke hisaab se redirect
-      if (user.role === "admin") navigate("/admin/dashboard");
+     if (user.role === "admin") navigate("/admin/dashboard");
       else if (user.role === "doctor") navigate("/doctor/appointments");
       else if (user.role === "receptionist") navigate("/receptionist/dashboard");
+      else if (user.role === "staff") navigate("/staff/dashboard");
       else navigate("/patient/dashboard");
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");

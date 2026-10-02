@@ -51,6 +51,9 @@ import PatientFullRecord from "./pages/admin/PatientFullRecord";
 import ManageReceptionists from "./pages/admin/ManageReceptionists";
 import ReceptionistDashboard from "./pages/receptionist/ReceptionistDashboard";
 
+import ManageStaff from "./pages/admin/ManageStaff";
+import StaffDashboard from "./pages/staff/StaffDashboard";
+
 function App() {
   return (
     <AuthProvider>
@@ -362,6 +365,24 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+                <Route
+                      path="/admin/staff"
+                      element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <ManageStaff />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/staff/dashboard"
+                      element={
+                        <ProtectedRoute allowedRoles={["staff"]}>
+                          <StaffDashboard />
+                        </ProtectedRoute>
+                      }
+                    />
                     </Routes>
                     <ToastContainer position="top-right" autoClose={2000} />
                   </BrowserRouter>

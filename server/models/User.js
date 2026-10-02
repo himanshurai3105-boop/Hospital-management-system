@@ -26,9 +26,13 @@ const userSchema = new mongoose.Schema(
     },
    role: {
   type: String,
-  enum: ["admin", "doctor", "patient", "receptionist"],
+  enum: ["admin", "doctor", "patient", "receptionist", "staff"],
   default: "patient",
 },
+    staffType: {
+      type: String,
+      enum: ["nurse", "ward_boy", "pharmacist", "lab_technician", "cleaner", "security", "other"],
+    },
   isActive: { type: Boolean, default: true },
 
     age: { type: Number, min: 0, max: 120 },
@@ -82,14 +86,14 @@ userSchema.pre("save", async function () {
     (this.isNew ||
       this.isModified("specialization") ||
       this.isModified("shiftType"))
-  ) {
+  ) 
+  {
     const { getBookingType } = require("../utils/bookingTypeHelper");
     this.bookingType = getBookingType(
       this.specialization,
       this.shiftType
     );
   }
-
   if (!this.isModified("password")) return;
 
   const salt = await bcrypt.genSalt(12);

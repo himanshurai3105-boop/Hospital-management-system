@@ -327,3 +327,73 @@ exports.deleteReceptionist = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Staff management
+
+exports.addStaff = async (req, res) => {
+  try {
+    const { name, email, password, phone, staffType, baseSalary } = req.body;
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(400).json({ message: "User with this email already exists" });
+
+    const staff = await User.create({ name, email, password, phone, staffType, baseSalary, role: "staff" });
+    res.status(201).json({
+      _id: staff._id,
+      hospitalId: staff.hospitalId,
+      name: staff.name,
+      email: staff.email,
+      staffType: staff.staffType,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getAllStaff = async (req, res) => {
+  try {
+    const staff = await User.find({ role: "staff" }).select("-password");
+    res.json(staff);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.editStaff = async (req, res) => {
+  try {
+    const staff = await User.findOne({ _id: req.params.id, role: "staff" });
+    if (!staff) return res.status(404).json({ message: "Staff member not found" });
+
+    const allowedFields = ["name", "phone", "staffType", "baseSalary"];
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) staff[field] = req.body[field];
+    });
+
+    await staff.save();
+    res.json(staff);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.toggleStaffStatus = async (req, res) => {
+  try {
+    const staff = await User.findOne({ _id: req.params.id, role: "staff" });
+    if (!staff) return res.status(404).json({ message: "Staff member not found" });
+
+    staff.isActive = !staff.isActive;
+    await staff.save();
+    res.json({ message: `Staff ${staff.isActive ? "reactivated" : "deactivated"}`, isActive: staff.isActive });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.deleteStaff = async (req, res) => {
+  try {
+    const staff = await User.findOneAndDelete({ _id: req.params.id, role: "staff" });
+    if (!staff) return res.status(404).json({ message: "Staff member not found" });
+    res.json({ message: "Staff member removed" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
