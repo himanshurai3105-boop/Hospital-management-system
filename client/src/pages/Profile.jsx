@@ -1,16 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
 
 const Profile = () => {
-  const { user, setUserManually } = useAuth();
+  const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({});
   const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [loading, setLoading] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef();
 
   const fetchProfile = async () => {
     try {
@@ -38,6 +40,34 @@ const Profile = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handlePasswordChange = (e) => setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+
+  const handlePhotoClick = () => fileInputRef.current.click();
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Image must be smaller than 3MB");
+      return;
+    }
+
+    const formDataPhoto = new FormData();
+    formDataPhoto.append("photo", file);
+
+    setUploadingPhoto(true);
+    try {
+      const res = await api.post("/auth/upload-photo", formDataPhoto, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setProfile((prev) => ({ ...prev, profilePhoto: res.data.profilePhoto }));
+      toast.success("Profile photo updated!");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to upload photo");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
@@ -90,17 +120,55 @@ const Profile = () => {
         <h3 className="mb-4">My Profile</h3>
 
         <div className="card shadow-sm p-4 mb-4">
-          <div className="d-flex justify-content-between align-items-start flex-wrap">
-            <div>
-              <h5 className="mb-1">{profile.name}</h5>
-              <p className="text-muted mb-1">{profile.email}</p>
-              <span className="badge bg-primary text-capitalize">{profile.role}</span>
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div className="d-flex align-items-center gap-3">
+              <div className="position-relative" style={{ cursor: "pointer" }} onClick={handlePhotoClick}>
+                {profile.profilePhoto ? (
+                  <img
+                    src={profile.profilePhoto}
+                    alt="Profile"
+                    className="rounded-circle"
+                    style={{ width: "80px", height: "80px", objectFit: "cover", border: "3px solid #0d6efd" }}
+                  />
+                ) : (
+                  <div
+                    className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                    style={{ width: "80px", height: "80px", background: "linear-gradient(135deg, #0d6efd, #6f42c1)", fontSize: "1.8rem" }}
+                  >
+                    {profile.name?.charAt(0) || "U"}
+                  </div>
+                )}
+                <div
+                  className="position-absolute bottom-0 end-0 bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                  style={{ width: "26px", height: "26px", fontSize: "0.8rem" }}
+                >
+                  📷
+                </div>
+                {uploadingPhoto && (
+                  <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 rounded-circle">
+                    <span className="spinner-border spinner-border-sm text-white" />
+                  </div>
+                )}
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="d-none"
+                accept="image/png, image/jpeg, image/webp"
+                onChange={handlePhotoChange}
+              />
+              <div>
+                <h5 className="mb-1">{profile.name}</h5>
+                <p className="text-muted mb-1">{profile.email}</p>
+                <span className="badge bg-primary text-capitalize">{profile.role}</span>
+              </div>
             </div>
             <div className="text-end">
               <p className="mb-0 text-muted small">Hospital ID</p>
               <h5 className="mb-0">{profile.hospitalId || "N/A"}</h5>
             </div>
           </div>
+          <p className="text-muted small mt-2 mb-0">Click your photo to upload a new one (max 3MB)</p>
         </div>
 
         <div className="row g-4">
