@@ -54,6 +54,9 @@ import ReceptionistDashboard from "./pages/receptionist/ReceptionistDashboard";
 import ManageStaff from "./pages/admin/ManageStaff";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 
+import BookRoomForPatient from "./pages/doctor/BookRoomForPatient";
+import MyRoomBookingsDoctor from "./pages/doctor/MyRoomBookingsDoctor";
+
 function App() {
   return (
     <AuthProvider>
@@ -380,6 +383,24 @@ function App() {
                       element={
                         <ProtectedRoute allowedRoles={["staff"]}>
                           <StaffDashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/doctor/book-room"
+                      element={
+                        <ProtectedRoute allowedRoles={["doctor"]}>
+                          <BookRoomForPatient />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/doctor/my-room-bookings"
+                      element={
+                        <ProtectedRoute allowedRoles={["doctor"]}>
+                          <MyRoomBookingsDoctor />
                         </ProtectedRoute>
                       }
                     />

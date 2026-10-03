@@ -81,9 +81,15 @@ exports.deleteRoom = async (req, res) => {
 
 // @route POST /api/rooms/book
 // @desc  Patient - book a specific bed
+// @route POST /api/rooms/book
+// @desc  Doctor - book a specific bed for a patient (based on medical need)
 exports.bookRoom = async (req, res) => {
   try {
-    const { bedId, fromDate, toDate } = req.body;
+    const { bedId, patientId, fromDate, toDate } = req.body;
+
+    const User = require("../models/User");
+    const patient = await User.findOne({ _id: patientId, role: "patient" });
+    if (!patient) return res.status(404).json({ message: "Patient not found" });
 
     const bed = await Bed.findById(bedId);
     if (!bed) return res.status(404).json({ message: "Bed not found" });
@@ -92,7 +98,8 @@ exports.bookRoom = async (req, res) => {
     }
 
     const booking = await RoomBooking.create({
-      patient: req.user._id,
+      patient: patientId,
+      doctor: req.user._id,
       room: bed.room,
       bed: bed._id,
       fromDate,
@@ -100,7 +107,7 @@ exports.bookRoom = async (req, res) => {
     });
 
     bed.status = "occupied";
-    bed.currentPatient = req.user._id;
+    bed.currentPatient = patientId;
     await bed.save();
 
     res.status(201).json(booking);
@@ -151,6 +158,21 @@ exports.getAllRoomBookings = async (req, res) => {
       .populate("room")
       .populate("bed")
       .populate("patient", "name email phone")
+      .sort({ createdAt: -1 });
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @route GET /api/rooms/my-bookings-doctor
+// @desc  Doctor - view room bookings they made for patients
+exports.getDoctorRoomBookings = async (req, res) => {
+  try {
+    const bookings = await RoomBooking.find({ doctor: req.user._id })
+      .populate("patient", "name hospitalId phone")
+      .populate("room")
+      .populate("bed")
       .sort({ createdAt: -1 });
     res.json(bookings);
   } catch (error) {

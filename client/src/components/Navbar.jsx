@@ -28,9 +28,6 @@ const Navbar = () => {
             <Link className="btn btn-outline-light btn-sm" to="/patient/history">
               History
             </Link>
-            <Link className="btn btn-outline-light btn-sm" to="/patient/book-room">
-              Book Room
-            </Link>
             <Link className="btn btn-outline-light btn-sm" to="/patient/my-rooms">
               My Rooms
             </Link>
@@ -71,6 +68,12 @@ const Navbar = () => {
               </Link>
               <Link className="btn btn-outline-light btn-sm" to="/doctor/patients">
                 My Patients
+              </Link>
+                            <Link className="btn btn-outline-light btn-sm" to="/doctor/book-room">
+                Book Room
+              </Link>
+              <Link className="btn btn-outline-light btn-sm" to="/doctor/my-room-bookings">
+                Room Bookings
               </Link>
               <Link className="btn btn-outline-light btn-sm" to="/doctor/schedule-checkup">
                 Schedule Checkup
