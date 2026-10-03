@@ -54,12 +54,13 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    res.json({
+      res.json({
       _id: user._id,
       hospitalId: user.hospitalId,
       name: user.name,
       email: user.email,
       role: user.role,
+      staffType: user.staffType,
       token: generateToken(user._id),
     });
   } catch (error) {

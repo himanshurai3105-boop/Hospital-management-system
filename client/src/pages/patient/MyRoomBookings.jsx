@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { toast } from "react-toastify";
 import Navbar from "../../components/Navbar";
 
-const statusColors = { pending: "warning", confirmed: "info", completed: "success", cancelled: "danger" };
+const statusColors = { confirmed: "info", completed: "success", cancelled: "danger" };
 
 const MyRoomBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -81,7 +82,7 @@ const MyRoomBookings = () => {
         {loading ? (
           <p>Loading...</p>
         ) : bookings.length === 0 ? (
-          <p className="text-muted">No room bookings yet.</p>
+          <p className="text-muted">No room bookings yet. Your doctor will admit you to a room if needed.</p>
         ) : (
           <div className="row g-3">
             {bookings.map((b) => (
@@ -91,23 +92,35 @@ const MyRoomBookings = () => {
                     <h6 className="mb-0">
                       Room {b.room?.roomNumber} — Bed {b.bed?.bedNumber}
                     </h6>
-                    <span className={`badge bg-${statusColors[b.status]}`}>{b.status}</span>
+                    <span className={`badge bg-${statusColors[b.status]} text-capitalize`}>{b.status}</span>
                   </div>
                   <p className="mb-1 text-capitalize text-muted">{b.room?.roomType}</p>
                   <p className="mb-1">
                     {new Date(b.fromDate).toLocaleDateString()} → {new Date(b.toDate).toLocaleDateString()}
                   </p>
                   <p className="mb-2 fw-bold">Total: ₹{calculateAmount(b)}</p>
+
                   {b.paymentStatus === "paid" ? (
-                    <span className="badge bg-success align-self-start">Paid</span>
+                    <div className="d-flex align-items-center gap-2">
+                      <span className="badge bg-success">Paid</span>
+                      <Link to={`/patient/receipt/${b._id}?type=room`} className="btn btn-sm btn-outline-secondary">
+                        Receipt
+                      </Link>
+                    </div>
                   ) : (
-                    <button
-                      className="btn btn-sm btn-primary align-self-start"
-                      onClick={() => handlePay(b)}
-                      disabled={payingId === b._id}
-                    >
-                      {payingId === b._id ? "Processing..." : "Pay Now"}
-                    </button>
+                    <>
+                      <span className="badge bg-warning text-dark align-self-start mb-2">Payment Pending</span>
+                      <p className="text-muted small mb-2">
+                        You can pay now, or settle this during final checkout/billing at discharge.
+                      </p>
+                      <button
+                        className="btn btn-sm btn-primary align-self-start"
+                        onClick={() => handlePay(b)}
+                        disabled={payingId === b._id}
+                      >
+                        {payingId === b._id ? "Processing..." : "Pay Now"}
+                      </button>
+                    </>
                   )}
                 </div>
               </div>

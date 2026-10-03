@@ -69,13 +69,13 @@ const Navbar = () => {
               <Link className="btn btn-outline-light btn-sm" to="/doctor/patients">
                 My Patients
               </Link>
-                            <Link className="btn btn-outline-light btn-sm" to="/doctor/book-room">
-                Book Room
-              </Link>
-              <Link className="btn btn-outline-light btn-sm" to="/doctor/my-room-bookings">
-                Room Bookings
-              </Link>
-              <Link className="btn btn-outline-light btn-sm" to="/doctor/schedule-checkup">
+                <Link className="btn btn-outline-light btn-sm" to="/doctor/request-room">
+                  Request Room
+                </Link>
+                <Link className="btn btn-outline-light btn-sm" to="/doctor/my-room-requests">
+                  My Room Requests
+                </Link>
+                              <Link className="btn btn-outline-light btn-sm" to="/doctor/schedule-checkup">
                 Schedule Checkup
               </Link>
               <Link className="btn btn-outline-light btn-sm" to="/doctor/checkups">

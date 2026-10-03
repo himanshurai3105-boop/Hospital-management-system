@@ -54,9 +54,9 @@ import ReceptionistDashboard from "./pages/receptionist/ReceptionistDashboard";
 import ManageStaff from "./pages/admin/ManageStaff";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 
-import BookRoomForPatient from "./pages/doctor/BookRoomForPatient";
-import MyRoomBookingsDoctor from "./pages/doctor/MyRoomBookingsDoctor";
-
+import RequestRoom from "./pages/doctor/RequestRoom";
+import MyRoomRequests from "./pages/doctor/MyRoomRequests";
+import BedCoordinatorDashboard from "./pages/staff/BedCoordinatorDashboard";
 function App() {
   return (
     <AuthProvider>
@@ -387,23 +387,32 @@ function App() {
                       }
                     />
 
-                    <Route
-                      path="/doctor/book-room"
-                      element={
-                        <ProtectedRoute allowedRoles={["doctor"]}>
-                          <BookRoomForPatient />
-                        </ProtectedRoute>
-                      }
-                    />
+                 <Route
+                    path="/doctor/request-room"
+                    element={
+                      <ProtectedRoute allowedRoles={["doctor"]}>
+                        <RequestRoom />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                    <Route
-                      path="/doctor/my-room-bookings"
-                      element={
-                        <ProtectedRoute allowedRoles={["doctor"]}>
-                          <MyRoomBookingsDoctor />
-                        </ProtectedRoute>
-                      }
-                    />
+                  <Route
+                    path="/doctor/my-room-requests"
+                    element={
+                      <ProtectedRoute allowedRoles={["doctor"]}>
+                        <MyRoomRequests />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/staff/bed-coordinator"
+                    element={
+                      <ProtectedRoute allowedRoles={["staff"]}>
+                        <BedCoordinatorDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
                     </Routes>
                     <ToastContainer position="top-right" autoClose={2000} />
                   </BrowserRouter>
