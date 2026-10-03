@@ -5,7 +5,6 @@ const {
   addRoom,
   editRoom,
   deleteRoom,
-  bookRoom,
   dischargeBed,
   getMyRoomBookings,
   getAllRoomBookings,
@@ -18,10 +17,9 @@ router.post("/", protect, authorize("admin"), addRoom);
 router.put("/:id", protect, authorize("admin"), editRoom);
 router.delete("/:id", protect, authorize("admin"), deleteRoom);
 
-router.post("/book", protect, authorize("doctor"), bookRoom);
-router.put("/beds/:bedId/discharge", protect, authorize("admin"), dischargeBed);
+router.put("/beds/:bedId/discharge", protect, authorize("admin", "staff"), dischargeBed);
 router.get("/my-bookings", protect, authorize("patient"), getMyRoomBookings);
-router.get("/bookings/all", protect, authorize("admin"), getAllRoomBookings);
 router.get("/my-bookings-doctor", protect, authorize("doctor"), getDoctorRoomBookings);
+router.get("/bookings/all", protect, authorize("admin"), getAllRoomBookings);
 
 module.exports = router;

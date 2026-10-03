@@ -31,9 +31,9 @@ const userSchema = new mongoose.Schema(
   default: "patient",
 },
     staffType: {
-      type: String,
-      enum: ["nurse", "ward_boy", "pharmacist", "lab_technician", "cleaner", "security", "other"],
-    },
+  type: String,
+  enum: ["nurse", "ward_boy", "pharmacist", "lab_technician", "cleaner", "security", "bed_coordinator", "other"],
+},
   isActive: { type: Boolean, default: true },
 
     age: { type: Number, min: 0, max: 120 },

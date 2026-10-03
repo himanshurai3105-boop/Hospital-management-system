@@ -64,6 +64,7 @@ app.use("/api/salary", require("./routes/salaryRoutes"));
 
 app.use("/api/shift-settings", require("./routes/shiftSettingsRoutes"));
 app.use("/api/receptionist", require("./routes/receptionistRoutes"));
+app.use("/api/room-requests", require("./routes/roomRequestRoutes"));
 
 // Global error handler (catches anything unexpected, never leaks stack trace to client)
 app.use((err, req, res, next) => {
