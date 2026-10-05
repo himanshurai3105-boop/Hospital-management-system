@@ -1,6 +1,16 @@
+const TZ = "Asia/Kolkata";
+
 const toMinutes = (hhmm) => {
   const [h, m] = hhmm.split(":").map(Number);
   return h * 60 + m;
+};
+
+// Abhi IST mein kitne minute huye (server kisi bhi timezone mein ho)
+const nowMinutesIST = () => {
+  const t = new Date().toLocaleTimeString("en-GB", {
+    timeZone: TZ, hourCycle: "h23", hour: "2-digit", minute: "2-digit",
+  });
+  return toMinutes(t);
 };
 
 const minutesToLabel = (totalMinutes) => {
@@ -19,18 +29,19 @@ const getSessions = (settings, shiftType) => {
 };
 
 const getNextSlot = (sessions, avgConsultationTime, alreadyBookedCount) => {
+  const avg = avgConsultationTime > 0 ? avgConsultationTime : 15;
   let remaining = alreadyBookedCount;
 
   for (const session of sessions) {
-    let startMin = toMinutes(session.start);
+    const startMin = toMinutes(session.start);
     let endMin = toMinutes(session.end);
     if (endMin <= startMin) endMin += 24 * 60;
 
     const durationMin = endMin - startMin;
-    const capacity = Math.floor(durationMin / avgConsultationTime);
+    const capacity = Math.floor(durationMin / avg);
 
     if (remaining < capacity) {
-      const slotStart = startMin + remaining * avgConsultationTime;
+      const slotStart = startMin + remaining * avg;
       return { timeSlot: minutesToLabel(slotStart), session: `${session.start}-${session.end}` };
     }
     remaining -= capacity;
@@ -45,9 +56,9 @@ const isWithinBookingWindow = (settings, shiftType) => {
   if (shiftType === "emergency") return true;
 
   const window = shiftType === "night" ? settings.bookingWindow.night : settings.bookingWindow.day;
-  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
-  let startMin = toMinutes(window.start);
-  let endMin = toMinutes(window.end);
+  const nowMin = nowMinutesIST();
+  const startMin = toMinutes(window.start);
+  const endMin = toMinutes(window.end);
 
   if (endMin <= startMin) {
     // window spans midnight (e.g. 18:00 - 06:00)
@@ -58,23 +69,24 @@ const isWithinBookingWindow = (settings, shiftType) => {
 
 // Which period are we in right now — used to decide which shiftType doctors to show
 const getCurrentShiftPeriod = (settings) => {
-  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+  const nowMin = nowMinutesIST();
   const dayWindow = settings.bookingWindow.day;
-  let startMin = toMinutes(dayWindow.start);
-  let endMin = toMinutes(dayWindow.end);
+  const startMin = toMinutes(dayWindow.start);
+  const endMin = toMinutes(dayWindow.end);
   const inDayWindow = nowMin >= startMin && nowMin < endMin;
   return inDayWindow ? "day" : "night";
 };
 
 // Generates every discrete time slot for a set of sessions (used for calendar-based booking)
 const generateAllSlots = (sessions, avgConsultationTime) => {
+  const avg = avgConsultationTime > 0 ? avgConsultationTime : 15;
   const slots = [];
   for (const session of sessions) {
-    let startMin = toMinutes(session.start);
+    const startMin = toMinutes(session.start);
     let endMin = toMinutes(session.end);
     if (endMin <= startMin) endMin += 24 * 60;
 
-    for (let t = startMin; t + avgConsultationTime <= endMin; t += avgConsultationTime) {
+    for (let t = startMin; t + avg <= endMin; t += avg) {
       slots.push(minutesToLabel(t));
     }
   }

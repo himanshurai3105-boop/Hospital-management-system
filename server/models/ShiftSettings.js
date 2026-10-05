@@ -6,6 +6,7 @@ const sessionSchema = new mongoose.Schema(
 );
 
 const shiftSettingsSchema = new mongoose.Schema({
+  // Day shift: 10 AM - 6 PM, lunch 1:30 - 2:30 PM
   daySessions: {
     type: [sessionSchema],
     default: [
@@ -13,16 +14,20 @@ const shiftSettingsSchema = new mongoose.Schema({
       { start: "14:30", end: "18:00" },
     ],
   },
+  // Night shift: 10 PM - 6 AM, lunch 1:30 - 2:30 AM
   nightSessions: {
     type: [sessionSchema],
-    default: [{ start: "22:00", end: "01:00" }],
-    default: [{ start: "02:00", end: "06:00" }],
+    default: [
+      { start: "22:00", end: "01:30" },
+      { start: "02:30", end: "06:00" },
+    ],
   },
+  // Emergency: 6 AM - 10 AM aur 6 PM - 10 PM
   emergencySessions: {
     type: [sessionSchema],
     default: [
+      { start: "06:00", end: "10:00" },
       { start: "18:00", end: "22:00" },
-      { start: "06:30", end: "10:00" },
     ],
   },
   bookingWindow: {
@@ -31,7 +36,7 @@ const shiftSettingsSchema = new mongoose.Schema({
   },
 });
 
-// Singleton helper — always returns the one settings doc, creating it if missing
+// Singleton helper: hamesha wahi ek settings doc deta hai, na ho to bana deta hai
 shiftSettingsSchema.statics.getSettings = async function () {
   let settings = await this.findOne();
   if (!settings) {

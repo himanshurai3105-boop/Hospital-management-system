@@ -1,3 +1,4 @@
+const { LAB_CATEGORY_KEYS } = require("../utils/labCategories");
 const User = require("../models/User");
 const Appointment = require("../models/Appointment");
 const MedicineOrder = require("../models/MedicineOrder");
@@ -202,15 +203,12 @@ exports.deleteDoctor = async (req, res) => {
 
 exports.getAllPatients = async (req, res) => {
   try {
-    const { search } = req.query;
+    const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
     const filter = { role: "patient" };
 
     if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { hospitalId: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-      ];
+      const rx = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+      filter.$or = [{ name: rx }, { hospitalId: rx }, { email: rx }];
     }
 
     const patients = await User.find(filter).select("-password");
@@ -332,19 +330,29 @@ exports.deleteReceptionist = async (req, res) => {
 
 exports.addStaff = async (req, res) => {
   try {
-    const { name, email, password, phone, staffType, baseSalary } = req.body;
+    const { name, email, password, phone, staffType, baseSalary, labSpecialization } = req.body;
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ message: "User with this email already exists" });
 
-    const staff = await User.create({ name, email, password, phone, staffType, baseSalary, role: "staff" });
+    const isLab = staffType === "lab_technician";
+    if (isLab && !LAB_CATEGORY_KEYS.includes(labSpecialization)) {
+      return res.status(400).json({ message: "Select a lab specialization for the Lab Technician" });
+    }
+
+    const staff = await User.create({
+      name, email, password, phone, staffType, baseSalary, role: "staff",
+      ...(isLab ? { labSpecialization } : {}),
+    });
     res.status(201).json({
       _id: staff._id,
       hospitalId: staff.hospitalId,
       name: staff.name,
       email: staff.email,
       staffType: staff.staffType,
+      labSpecialization: staff.labSpecialization,
     });
   } catch (error) {
+    if (error.name === "ValidationError") return res.status(400).json({ message: error.message });
     res.status(500).json({ message: error.message });
   }
 };
@@ -363,14 +371,25 @@ exports.editStaff = async (req, res) => {
     const staff = await User.findOne({ _id: req.params.id, role: "staff" });
     if (!staff) return res.status(404).json({ message: "Staff member not found" });
 
-    const allowedFields = ["name", "phone", "staffType", "baseSalary"];
-    allowedFields.forEach((field) => {
+    // Type aur specialization pehle jaanch lo, phir badlo
+    const nextType = req.body.staffType !== undefined ? req.body.staffType : staff.staffType;
+    let nextSpec;
+    if (nextType === "lab_technician") {
+      nextSpec = req.body.labSpecialization !== undefined ? req.body.labSpecialization : staff.labSpecialization;
+      if (!LAB_CATEGORY_KEYS.includes(nextSpec)) {
+        return res.status(400).json({ message: "Select a lab specialization for the Lab Technician" });
+      }
+    }
+
+    ["name", "phone", "staffType", "baseSalary"].forEach((field) => {
       if (req.body[field] !== undefined) staff[field] = req.body[field];
     });
+    staff.labSpecialization = nextSpec; // lab technician nahi raha to hat jaayega
 
     await staff.save();
     res.json(staff);
   } catch (error) {
+    if (error.name === "ValidationError") return res.status(400).json({ message: error.message });
     res.status(500).json({ message: error.message });
   }
 };

@@ -26,8 +26,6 @@ import MyReportsGiven from "./pages/doctor/MyReportsGiven";
 import MyReports from "./pages/patient/MyReports";
 
 import ManageMedicines from "./pages/admin/ManageMedicines";
-import Pharmacy from "./pages/patient/Pharmacy";
-import MyOrders from "./pages/patient/MyOrders";
 import MyPatients from "./pages/doctor/MyPatients";
 import PatientProfile from "./pages/doctor/PatientProfile";
 
@@ -57,6 +55,17 @@ import StaffDashboard from "./pages/staff/StaffDashboard";
 import RequestRoom from "./pages/doctor/RequestRoom";
 import MyRoomRequests from "./pages/doctor/MyRoomRequests";
 import BedCoordinatorDashboard from "./pages/staff/BedCoordinatorDashboard";
+
+import PharmacyDashboard from "./pages/staff/PharmacyDashboard";
+import MedicineHistory from "./pages/patient/MedicineHistory";
+
+import DoctorInsights from "./pages/admin/DoctorInsights";
+import PatientHistory from "./pages/doctor/PatientHistory";
+import MyQueue from "./pages/patient/MyQueue";
+
+import EditReport from "./pages/doctor/EditReport";
+import LabTests from "./pages/admin/LabTests";
+
 function App() {
   return (
     <AuthProvider>
@@ -197,24 +206,6 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <ManageMedicines />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/patient/pharmacy"
-            element={
-              <ProtectedRoute allowedRoles={["patient"]}>
-                <Pharmacy />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/patient/orders"
-            element={
-              <ProtectedRoute allowedRoles={["patient"]}>
-                <MyOrders />
               </ProtectedRoute>
             }
           />
@@ -412,6 +403,51 @@ function App() {
                         <BedCoordinatorDashboard />
                       </ProtectedRoute>
                     }
+                  />
+
+                  <Route
+                    path="/staff/pharmacy"
+                    element={
+                      <ProtectedRoute allowedRoles={["staff"]}>
+                        <PharmacyDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/patient/medicine-history"
+                    element={
+                      <ProtectedRoute allowedRoles={["patient"]}>
+                        <MedicineHistory />
+                      </ProtectedRoute>
+                    }
+                  />
+
+
+                  <Route
+                    path="/admin/doctor-insights"
+                    element={<ProtectedRoute allowedRoles={["admin"]}><DoctorInsights /></ProtectedRoute>}
+                  />
+                  <Route
+                    path="/doctor/patient-history"
+                    element={<ProtectedRoute allowedRoles={["doctor"]}><PatientHistory /></ProtectedRoute>}
+                  />
+                  <Route
+                    path="/patient/my-queue"
+                    element={
+                      <ProtectedRoute allowedRoles={["patient"]}>
+                        <MyQueue />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/doctor/reports/:reportId/edit"
+                    element={<ProtectedRoute allowedRoles={["doctor"]}><EditReport /></ProtectedRoute>}
+                  />
+                  <Route
+                    path="/admin/lab-tests"
+                    element={<ProtectedRoute allowedRoles={["admin"]}><LabTests /></ProtectedRoute>}
                   />
                     </Routes>
                     <ToastContainer position="top-right" autoClose={2000} />

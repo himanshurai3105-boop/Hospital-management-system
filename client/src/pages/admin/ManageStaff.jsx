@@ -10,7 +10,20 @@ const staffTypeLabels = {
   lab_technician: "Lab Technician",
   cleaner: "Cleaner",
   security: "Security",
+  bed_coordinator: "Bed Coordinator",
   other: "Other",
+};
+
+// server/utils/labCategories.js ke keys ke barabar rakhna
+const labCategoryLabels = {
+  pathology: "Pathology (Blood / Urine)",
+  radiology: "Radiology (X-ray / CT / MRI / Ultrasound)",
+  cardiac_tests: "Cardiac Tests (ECG / Echo / TMT)",
+  microbiology: "Microbiology (Cultures)",
+};
+
+const emptyForm = {
+  name: "", email: "", password: "", phone: "", staffType: "nurse", baseSalary: "", labSpecialization: "",
 };
 
 const ManageStaff = () => {
@@ -18,9 +31,7 @@ const ManageStaff = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [staffTypeFilter, setStaffTypeFilter] = useState("all");
-  const [formData, setFormData] = useState({
-    name: "", email: "", password: "", phone: "", staffType: "nurse", baseSalary: "",
-  });
+  const [formData, setFormData] = useState(emptyForm);
 
   const fetchStaff = async () => {
     try {
@@ -38,19 +49,26 @@ const ManageStaff = () => {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const resetForm = () => {
-    setFormData({ name: "", email: "", password: "", phone: "", staffType: "nurse", baseSalary: "" });
+    setFormData(emptyForm);
     setEditingId(null);
     setShowForm(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const isLab = formData.staffType === "lab_technician";
+    if (isLab && !formData.labSpecialization) {
+      toast.error("Select a lab specialization");
+      return;
+    }
+    const payload = { ...formData, labSpecialization: isLab ? formData.labSpecialization : undefined };
+
     try {
       if (editingId) {
-        await api.put(`/admin/staff/${editingId}`, formData);
+        await api.put(`/admin/staff/${editingId}`, payload);
         toast.success("Staff updated");
       } else {
-        await api.post("/admin/staff", formData);
+        await api.post("/admin/staff", payload);
         toast.success("Staff added");
       }
       resetForm();
@@ -64,6 +82,7 @@ const ManageStaff = () => {
     setFormData({
       name: s.name, email: s.email, password: "", phone: s.phone || "",
       staffType: s.staffType || "nurse", baseSalary: s.baseSalary || "",
+      labSpecialization: s.labSpecialization || "",
     });
     setEditingId(s._id);
     setShowForm(true);
@@ -134,6 +153,18 @@ const ManageStaff = () => {
                     ))}
                   </select>
                 </div>
+                {formData.staffType === "lab_technician" && (
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label">Lab Specialization</label>
+                    <select name="labSpecialization" className="form-select" value={formData.labSpecialization} onChange={handleChange} required>
+                      <option value="">-- Select --</option>
+                      {Object.entries(labCategoryLabels).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                    <div className="form-text">Ye technician sirf isi category ke tests dekhega.</div>
+                  </div>
+                )}
                 <div className="col-md-6 mb-3">
                   <label className="form-label">Base Monthly Salary (₹)</label>
                   <input type="number" name="baseSalary" className="form-control" value={formData.baseSalary} onChange={handleChange} placeholder="e.g. 25000" />
@@ -174,7 +205,12 @@ const ManageStaff = () => {
                   <td>{s.hospitalId}</td>
                   <td>{s.name}</td>
                   <td>{s.email}</td>
-                  <td>{staffTypeLabels[s.staffType] || "-"}</td>
+                  <td>
+                    {staffTypeLabels[s.staffType] || "-"}
+                    {s.staffType === "lab_technician" && s.labSpecialization && (
+                      <div className="small text-muted">{labCategoryLabels[s.labSpecialization] || s.labSpecialization}</div>
+                    )}
+                  </td>
                   <td>₹{s.baseSalary || 0}</td>
                   <td>
                     <span className={`badge bg-${s.isActive ? "success" : "danger"}`}>

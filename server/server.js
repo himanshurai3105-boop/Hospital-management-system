@@ -6,6 +6,7 @@ const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const connectDB = require("./config/db");
 const { startAutoCancelJob } = require("./jobs/autoCancelAppointments");
+const { startQueueRollover } = require("./jobs/queueRollover");
 dotenv.config();
 connectDB();
 
@@ -65,6 +66,9 @@ app.use("/api/salary", require("./routes/salaryRoutes"));
 app.use("/api/shift-settings", require("./routes/shiftSettingsRoutes"));
 app.use("/api/receptionist", require("./routes/receptionistRoutes"));
 app.use("/api/room-requests", require("./routes/roomRequestRoutes"));
+app.use("/api/pharmacy", require("./routes/pharmacyRoutes"));
+app.use("/api/doctor-insights", require("./routes/doctorInsightsRoutes"));
+app.use("/api/lab", require("./routes/labRoutes"));
 
 // Global error handler (catches anything unexpected, never leaks stack trace to client)
 app.use((err, req, res, next) => {
@@ -87,4 +91,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   startAutoCancelJob();
+  startQueueRollover();
 });

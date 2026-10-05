@@ -18,9 +18,29 @@ const appointmentSchema = new mongoose.Schema(
     razorpayOrderId: { type: String },
     razorpayPaymentId: { type: String },
     razorpayRefundId: { type: String },
-  
+    
+  // NEW: queue (daily) ya scheduled (special calendar) booking
+    bookingType: { type: String, enum: ["queue", "scheduled"], default: "queue" },
+    queueDate: { type: String },
+    priorityDate: { type: String },
+    seq: { type: Number },
+    carriedOver: { type: Boolean, default: false },
+    amountPaid: { type: Number },
+    refundAmount: { type: Number },
   },
   { timestamps: true }
+  );
+
+// NEW: ek doctor ka ek date + slot par sirf ek active scheduled appointment
+appointmentSchema.index(
+  { doctor: 1, date: 1, timeSlot: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      bookingType: "scheduled",
+      status: { $in: ["pending", "waiting", "confirmed"] },
+    },
+  }
 );
 
 

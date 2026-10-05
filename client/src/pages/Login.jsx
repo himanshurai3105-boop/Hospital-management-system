@@ -21,13 +21,16 @@ const Login = () => {
       toast.success("Login successful!");
 
       // Role ke hisaab se redirect
-     if (user.role === "admin") navigate("/admin/dashboard");
+    // Role ke hisaab se redirect
+      if (user.role === "admin") navigate("/admin/dashboard");
       else if (user.role === "doctor") navigate("/doctor/appointments");
       else if (user.role === "receptionist") navigate("/receptionist/dashboard");
-      else if (user.role === "staff") {
-      if (user.staffType === "bed_coordinator") navigate("/staff/bed-coordinator");
-      else navigate("/staff/dashboard");
-}
+      else if (user.role === "patient") navigate("/patient/dashboard");
+     else if (user.role === "staff") {
+        if (user.staffType === "bed_coordinator") navigate("/staff/bed-coordinator");
+        else if (user.staffType === "pharmacist") navigate("/staff/pharmacy");
+        else navigate("/staff/dashboard");
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {
