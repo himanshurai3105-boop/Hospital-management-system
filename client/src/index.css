@@ -21,6 +21,7 @@ body {
   height: 500px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 50%;
+  pointer-events: none;
 }
 
 .hero-gradient::after {
@@ -32,6 +33,7 @@ body {
   height: 350px;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 50%;
+  pointer-events: none;
 }
 
 .feature-card {
