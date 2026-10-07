@@ -2,35 +2,25 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { getHomeLink } from "../utils/homeRoute";
+import AuthLayout from "../components/AuthLayout";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const user = await login(formData.email, formData.password);
+      const user = await login(formData.email.trim(), formData.password);
       toast.success("Login successful!");
-
-      // Role ke hisaab se redirect
-    // Role ke hisaab se redirect
-      if (user.role === "admin") navigate("/admin/dashboard");
-      else if (user.role === "doctor") navigate("/doctor/appointments");
-      else if (user.role === "receptionist") navigate("/receptionist/dashboard");
-      else if (user.role === "patient") navigate("/patient/dashboard");
-     else if (user.role === "staff") {
-        if (user.staffType === "bed_coordinator") navigate("/staff/bed-coordinator");
-        else if (user.staffType === "pharmacist") navigate("/staff/pharmacy");
-        else navigate("/staff/dashboard");
-      }
+      navigate(getHomeLink(user));
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {
@@ -39,41 +29,36 @@ const Login = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: "90vh" }}>
-      <div className="card shadow-sm p-4" style={{ maxWidth: "400px", width: "100%" }}>
-        <h3 className="text-center mb-4">Login</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label">Email</label>
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Login to manage your appointments and reports."
+      footer={<>Don't have an account? <Link to="/signup">Sign up</Link></>}
+    >
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label className="form-label">Email</label>
+          <input
+            type="email" name="email" className="form-control" autoComplete="username"
+            value={formData.email} onChange={handleChange} required
+          />
+        </div>
+        <div className="mb-4">
+          <label className="form-label">Password</label>
+          <div className="pw-wrap">
             <input
-              type="email"
-              name="email"
-              className="form-control"
-              value={formData.email}
-              onChange={handleChange}
-              required
+              type={showPw ? "text" : "password"} name="password" className="form-control"
+              autoComplete="current-password" value={formData.password} onChange={handleChange} required
             />
+            <button type="button" className="pw-toggle" onClick={() => setShowPw(!showPw)}>
+              {showPw ? "Hide" : "Show"}
+            </button>
           </div>
-          <div className="mb-3">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              name="password"
-              className="form-control"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
-        <p className="text-center mt-3 mb-0">
-          Don't have an account? <Link to="/signup">Sign up</Link>
-        </p>
-      </div>
-    </div>
+        </div>
+        <button type="submit" className="btn btn-primary w-100 py-2" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
+    </AuthLayout>
   );
 };
 

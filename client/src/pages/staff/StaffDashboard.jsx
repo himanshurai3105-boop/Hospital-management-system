@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
+import DashboardHero from "../../components/DashboardHero";
 import Navbar from "../../components/Navbar";
 
 const months = [
@@ -34,6 +35,7 @@ const StaffDashboard = () => {
       </nav>
 
       <div className="container mt-4">
+        <DashboardHero icon="🛎️" title="Front Desk" subtitle="Welcome back." />
         <h3 className="mb-4">Welcome, {user?.name}</h3>
 
         <h5 className="mb-3">My Salary History</h5>

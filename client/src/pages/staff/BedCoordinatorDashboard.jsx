@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import { toast } from "react-toastify";
 import Navbar from "../../components/Navbar";
+import DashboardHero from "../../components/DashboardHero";
 
 const urgencyColors = { normal: "secondary", urgent: "warning", emergency: "danger" };
 
@@ -89,6 +90,7 @@ const BedCoordinatorDashboard = () => {
       </nav>
 
       <div className="container mt-4 mb-5">
+        <DashboardHero icon="🛎️" title="Front Desk" subtitle="Welcome back." />
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h3 className="mb-0">Welcome, {user?.name}</h3>
           <small className="text-muted">🔄 Live updates every 10s</small>

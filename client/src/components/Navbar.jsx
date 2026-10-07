@@ -1,103 +1,205 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { getHomeLink } from "../utils/homeRoute";
 
-const linkClass = "btn btn-outline-light btn-sm";
+// Har role ka menu: seedha link ya group (children ke saath)
+const MENUS = {
+  patient: [
+    { label: "Dashboard", to: "/patient/dashboard" },
+    { label: "Book Appointment", to: "/patient/book-appointment" },
+    { label: "Live Queue", to: "/patient/my-queue" },
+    { label: "History", to: "/patient/history" },
+    {
+      label: "Health Records",
+      children: [
+        { label: "My Reports", to: "/patient/reports" },
+        { label: "Medicine History", to: "/patient/medicine-history" },
+        { label: "My Checkups", to: "/patient/checkups" },
+      ],
+    },
+    {
+      label: "Rooms",
+      children: [
+        { label: "Book Room", to: "/patient/book-room" },
+        { label: "My Rooms", to: "/patient/my-rooms" },
+      ],
+    },
+    {
+      label: "Feedback",
+      children: [
+        { label: "Give Feedback", to: "/patient/give-feedback" },
+        { label: "My Reviews", to: "/patient/my-feedback" },
+      ],
+    },
+  ],
+  doctor: [
+    { label: "Today's Appointments", to: "/doctor/appointments" },
+    {
+      label: "Patients",
+      children: [
+        { label: "My Patients", to: "/doctor/patients" },
+        { label: "Patient History", to: "/doctor/patient-history" },
+      ],
+    },
+    {
+      label: "Reports",
+      children: [
+        { label: "Add Report", to: "/doctor/add-report" },
+        { label: "My Reports", to: "/doctor/reports" },
+        { label: "Schedule Checkup", to: "/doctor/schedule-checkup" },
+        { label: "Checkups", to: "/doctor/checkups" },
+      ],
+    },
+    {
+      label: "Rooms",
+      children: [
+        { label: "Request Room", to: "/doctor/request-room" },
+        { label: "My Room Requests", to: "/doctor/my-room-requests" },
+      ],
+    },
+    {
+      label: "My Work",
+      children: [
+        { label: "My Salary", to: "/doctor/salary" },
+        { label: "My Shift", to: "/doctor/my-shift" },
+      ],
+    },
+  ],
+  admin: [
+    { label: "Dashboard", to: "/admin/dashboard" },
+    {
+      label: "People",
+      children: [
+        { label: "Doctors", to: "/admin/doctors" },
+        { label: "Doctor Insights", to: "/admin/doctor-insights" },
+        { label: "Patients", to: "/admin/patients" },
+        { label: "Receptionists", to: "/admin/receptionists" },
+        { label: "Staff", to: "/admin/staff" },
+      ],
+    },
+    { label: "Appointments", to: "/admin/appointments" },
+    {
+      label: "Hospital",
+      children: [
+        { label: "Rooms", to: "/admin/rooms" },
+        { label: "Equipment", to: "/admin/equipment" },
+        { label: "Medicines", to: "/admin/medicines" },
+        { label: "Lab Tests", to: "/admin/lab-tests" },
+      ],
+    },
+    {
+      label: "Finance & Settings",
+      children: [
+        { label: "Payroll", to: "/admin/payroll" },
+        { label: "Shift Settings", to: "/admin/shift-settings" },
+      ],
+    },
+  ],
+};
 
-// Har role ka home page, Login.jsx ke redirect se same
-const getHomeLink = (user) => {
-  if (!user) return "/login";
-  switch (user.role) {
-    case "admin":
-      return "/admin/dashboard";
-    case "doctor":
-      return "/doctor/appointments";
-    case "receptionist":
-      return "/receptionist/dashboard";
-    case "patient":
-      return "/patient/dashboard";
-    case "staff":
-      if (user.staffType === "bed_coordinator") return "/staff/bed-coordinator";
-      if (user.staffType === "pharmacist") return "/staff/pharmacy";
-      return "/staff/dashboard";
-    default:
-      return "/"; // koi naya ya unknown role aaye to bhi koi redirect loop nahi
-  }
+const linkCls = ({ isActive }) => `nav-link-btn${isActive ? " active" : ""}`;
+const subCls = ({ isActive }) => `nav-sub${isActive ? " active" : ""}`;
+
+const NavGroup = ({ item, openKey, setOpenKey }) => {
+  const { pathname } = useLocation();
+  const isOpen = openKey === item.label;
+  const active = item.children.some((c) => pathname.startsWith(c.to));
+
+  return (
+    <div className={`nav-group${isOpen ? " is-open" : ""}`}>
+      <button
+        type="button"
+        className={`nav-link-btn${active ? " active" : ""}`}
+        aria-expanded={isOpen}
+        onClick={() => setOpenKey(isOpen ? null : item.label)}
+      >
+        <span>{item.label}</span>
+        <span className="caret">▾</span>
+      </button>
+      <div className="nav-group-menu">
+        {item.children.map((c) => (
+          <NavLink key={c.to} to={c.to} className={subCls}>
+            {c.label}
+          </NavLink>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 const Navbar = () => {
   const { user, logout } = useAuth();
-  const homeLink = getHomeLink(user);
+  const { pathname } = useLocation();
+  const [open, setOpen] = useState(false);
+  const [openKey, setOpenKey] = useState(null);
+  const ref = useRef(null);
+
+  // Page badalte hi menu band
+  useEffect(() => {
+    setOpen(false);
+    setOpenKey(null);
+  }, [pathname]);
+
+  // Bahar click / tap par dropdown band
+  useEffect(() => {
+    const onOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpenKey(null);
+    };
+    document.addEventListener("mousedown", onOutside);
+    document.addEventListener("touchstart", onOutside);
+    return () => {
+      document.removeEventListener("mousedown", onOutside);
+      document.removeEventListener("touchstart", onOutside);
+    };
+  }, []);
+
+  const home = getHomeLink(user);
+  const items = MENUS[user?.role] || (user ? [{ label: "Dashboard", to: home }] : []);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary px-3">
-      <Link className="navbar-brand" to={homeLink}>
-        🏥 Hospital MS
-      </Link>
-      <div className="ms-auto d-flex flex-wrap gap-2 justify-content-end">
-        {user?.role === "patient" && (
-          <>
-            <Link className={linkClass} to="/patient/dashboard">Dashboard</Link>
-            <Link className={linkClass} to="/patient/book-appointment">Book Appointment</Link>
-            <Link className={linkClass} to="/patient/my-queue">Live Queue</Link>
-            <Link className={linkClass} to="/patient/history">History</Link>
-            <Link className={linkClass} to="/patient/my-rooms">My Rooms</Link>
-            <Link className={linkClass} to="/patient/reports">My Reports</Link>
-            <Link className={linkClass} to="/patient/medicine-history">Medicine History</Link>
-            <Link className={linkClass} to="/patient/checkups">My Checkups</Link>
-            <Link className={linkClass} to="/patient/give-feedback">Give Feedback</Link>
-            <Link className={linkClass} to="/patient/my-feedback">My Reviews</Link>
-          </>
-        )}
+    <nav className="app-nav" ref={ref}>
+      <div className="app-nav__inner">
+        <Link className="app-nav__brand" to={home}>
+          🏥 Hospital MS
+        </Link>
 
-        {user?.role === "doctor" && (
-          <>
-            <Link className={linkClass} to="/doctor/appointments">Today's Appointments</Link>
-            <Link className={linkClass} to="/doctor/add-report">Add Report</Link>
-            <Link className={linkClass} to="/doctor/reports">My Reports</Link>
-            <Link className={linkClass} to="/doctor/salary">My Salary</Link>
-            <Link className={linkClass} to="/doctor/my-shift">My Shift</Link>
-            <Link className={linkClass} to="/doctor/patients">My Patients</Link>
-            <Link className={linkClass} to="/doctor/patient-history">Patient History</Link>
-            <Link className={linkClass} to="/doctor/request-room">Request Room</Link>
-            <Link className={linkClass} to="/doctor/my-room-requests">My Room Requests</Link>
-            <Link className={linkClass} to="/doctor/schedule-checkup">Schedule Checkup</Link>
-            <Link className={linkClass} to="/doctor/checkups">Checkups</Link>
-          </>
-        )}
+        <button
+          type="button"
+          className={`app-nav__toggle${open ? " is-open" : ""}`}
+          aria-label="Toggle menu"
+          aria-expanded={open}
+          onClick={() => setOpen(!open)}
+        >
+          <span className="bar" />
+          <span className="bar" />
+          <span className="bar" />
+        </button>
 
-        {user?.role === "admin" && (
-          <>
-            <Link className={linkClass} to="/admin/dashboard">Dashboard</Link>
-            <Link className={linkClass} to="/admin/doctors">Doctors</Link>
-            <Link className={linkClass} to="/admin/doctor-insights">Doctor Insights</Link>
-            <Link className={linkClass} to="/admin/patients">Patients</Link>
-            <Link className={linkClass} to="/admin/appointments">Appointments</Link>
-            <Link className={linkClass} to="/admin/rooms">Rooms</Link>
-            <Link className={linkClass} to="/admin/medicines">Medicines</Link>
-            <Link className={linkClass} to="/admin/lab-tests">Lab Tests</Link>
-            <Link className={linkClass} to="/admin/equipment">Equipment</Link>
-            <Link className={linkClass} to="/admin/payroll">Payroll</Link>
-            <Link className={linkClass} to="/admin/shift-settings">Shift Settings</Link>
-            <Link className={linkClass} to="/admin/receptionists">Receptionists</Link>
-            <Link className={linkClass} to="/admin/staff">Staff</Link>
-          </>
-        )}
+        <div className={`app-nav__menu${open ? " is-open" : ""}`}>
+          <div className="app-nav__links">
+            {items.map((item) =>
+              item.children ? (
+                <NavGroup key={item.label} item={item} openKey={openKey} setOpenKey={setOpenKey} />
+              ) : (
+                <NavLink key={item.to} to={item.to} className={linkCls}>
+                  {item.label}
+                </NavLink>
+              )
+            )}
+          </div>
 
-        {(user?.role === "receptionist" || user?.role === "staff") && (
-          <Link className={linkClass} to={homeLink}>Dashboard</Link>
-        )}
-
-        {user && (
-          <Link className={linkClass} to="/profile">My Profile</Link>
-        )}
-
-        {user ? (
-          <button className="btn btn-light btn-sm" onClick={logout}>
-            Logout
-          </button>
-        ) : (
-          <Link className="btn btn-light btn-sm" to="/login">Login</Link>
-        )}
+          <div className="app-nav__user">
+            {user ? (
+              <>
+                <NavLink to="/profile" className={linkCls}>My Profile</NavLink>
+                <button className="btn btn-light btn-sm" onClick={logout}>Logout</button>
+              </>
+            ) : (
+              <Link className="btn btn-light btn-sm" to="/login">Login</Link>
+            )}
+          </div>
+        </div>
       </div>
     </nav>
   );

@@ -1,3 +1,6 @@
+import DashboardHero from "../../components/DashboardHero";
+import TileGrid from "../../components/TileGrid";
+import { ADMIN_TILES } from "../../utils/dashboardTiles";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -50,6 +53,9 @@ const AdminDashboard = () => {
     <>
       <Navbar />
       <div className="container mt-4 mb-5">
+        <DashboardHero icon="🏥" title="Admin Console" subtitle="Everything that runs the hospital, one tap away." />
+<TileGrid tiles={ADMIN_TILES} />
+<div className="mb-4" />
         <h2 className="mb-4">Admin Panel — {user?.name}</h2>
 
         <div className="row g-4 mb-4">

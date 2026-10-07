@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import { toast } from "react-toastify";
+import Navbar from "../../components/Navbar";
+import DashboardHero from "../../components/DashboardHero";
 
 const PharmacyDashboard = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -117,15 +119,14 @@ const PharmacyDashboard = () => {
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary px-3">
-        <span className="navbar-brand">🏥 Hospital MS — Pharmacy Counter</span>
-        <div className="ms-auto">
-          <button className="btn btn-light btn-sm" onClick={logout}>Logout</button>
-        </div>
-      </nav>
+             <Navbar />
 
       <div className="container mt-4 mb-5">
-        <h3 className="mb-4">Welcome, {user?.name}</h3>
+        <DashboardHero
+          icon="💊"
+          title="Pharmacy Counter"
+          subtitle={`Welcome, ${user?.name}. Search a patient and dispense the prescribed medicines.`}
+        />
 
         {!selectedPatient ? (
           <div className="card shadow-sm p-4" style={{ maxWidth: "500px" }}>

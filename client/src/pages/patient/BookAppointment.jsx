@@ -585,7 +585,7 @@ const BookAppointment = () => {
                 const isFull = doc.bookingType === "queue" && doc.todayBooked >= doc.dailyCapacity;
                 const fillPercent = Math.min(100, Math.round((doc.todayBooked / doc.dailyCapacity) * 100));
                 return (
-                  <div className="col-md-4" key={doc._id}>
+                  <div className="col-sm-6 col-lg-4" key={doc._id}>
                     <div className="card shadow-sm p-3">
                       <div className="d-flex justify-content-between align-items-start">
                         <h5>{doc.name}</h5>

@@ -66,6 +66,8 @@ import MyQueue from "./pages/patient/MyQueue";
 import EditReport from "./pages/doctor/EditReport";
 import LabTests from "./pages/admin/LabTests";
 
+import LabDashboard from "./pages/staff/LabDashboard";
+
 function App() {
   return (
     <AuthProvider>
@@ -399,20 +401,20 @@ function App() {
                   <Route
                     path="/staff/bed-coordinator"
                     element={
-                      <ProtectedRoute allowedRoles={["staff"]}>
+                      <ProtectedRoute allowedRoles={["staff"]} allowedStaffTypes={["bed_coordinator"]}>
                         <BedCoordinatorDashboard />
                       </ProtectedRoute>
                     }
                   />
 
-                  <Route
-                    path="/staff/pharmacy"
-                    element={
-                      <ProtectedRoute allowedRoles={["staff"]}>
-                        <PharmacyDashboard />
-                      </ProtectedRoute>
-                    }
-                  />
+                <Route
+                  path="/staff/pharmacy"
+                  element={
+                    <ProtectedRoute allowedRoles={["staff"]} allowedStaffTypes={["pharmacist"]}>
+                      <PharmacyDashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
                   <Route
                     path="/patient/medicine-history"
@@ -448,6 +450,14 @@ function App() {
                   <Route
                     path="/admin/lab-tests"
                     element={<ProtectedRoute allowedRoles={["admin"]}><LabTests /></ProtectedRoute>}
+                  />
+                  <Route
+                  path="/staff/lab"
+                  element={
+                    <ProtectedRoute allowedRoles={["staff"]} allowedStaffTypes={["lab_technician"]}>
+                      <LabDashboard />
+                    </ProtectedRoute>
+                  }
                   />
                     </Routes>
                     <ToastContainer position="top-right" autoClose={2000} />

@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { toast } from "react-toastify";
 import Navbar from "../../components/Navbar";
+import DashboardHero from "../../components/DashboardHero";
+import TileGrid from "../../components/TileGrid";
+import { DOCTOR_TILES } from "../../utils/dashboardTiles";
+
 
 const statusColors = {
   pending: "secondary",
@@ -52,7 +56,10 @@ const TodayAppointments = () => {
     <>
       <Navbar />
       <div className="container mt-4">
-        <div className="d-flex justify-content-between align-items-center mb-4">
+        <DashboardHero icon="👨‍⚕️" title="Doctor Desk" subtitle="Your patients, reports and schedule." />
+      <TileGrid tiles={DOCTOR_TILES} />
+      <div className="mb-4" />
+              <div className="d-flex justify-content-between align-items-center mb-4">
           <h3 className="mb-0">Today's Appointments</h3>
           <small className="text-muted">🔄 Live updates every 10s</small>
         </div>
